@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">WestSoftUkraineTestApp</string>
+
+    <string name="set_max_elements">Set Max Elements</string>
+    <string name="change_max_elements">Change Max Elements</string>
+    <string name="enter_max_elements">Enter value</string>
+
+    <string name="exit">Please click BACK again to exit</string>
+
+
+</resources>
