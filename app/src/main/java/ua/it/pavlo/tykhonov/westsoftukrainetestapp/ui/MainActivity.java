@@ -1,6 +1,7 @@
 package ua.it.pavlo.tykhonov.westsoftukrainetestapp.ui;
 
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Handler;
@@ -37,7 +38,7 @@ import ua.it.pavlo.tykhonov.westsoftukrainetestapp.utils.EndlessRecyclerViewScro
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    private static final int DEFAULT_MAX_ELEMENTS_IN_MEMORY = 50;
+    private static int DEFAULT_MAX_ELEMENTS_IN_MEMORY = 50;
     private int from = 0;
 
     private boolean doubleBackToExitPressedOnce = false;
@@ -51,7 +52,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     // Store a member variable for the listener
     private EndlessRecyclerViewScrollListener scrollListener;
 
-    private Resources res = getResources();
+    private LinearLayoutManager mLayoutManager;
+
+    private Resources res;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -77,12 +80,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        res = getResources();
+
         usersList = new ArrayList<>();
         usersAdapter = new UsersAdapter(this, usersList);
 
+        mLayoutManager = new LinearLayoutManager(this);
+
+        int orientation = getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT){
+            recyclerView.setLayoutManager(mLayoutManager);
+        } else{
+            recyclerView.setLayoutManager(mLayoutManager);
+        }
+
         recyclerView.setHasFixedSize(true);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(null);
         recyclerView.setAdapter(usersAdapter);
 
@@ -141,13 +153,24 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         final EditText etMaxElements = (EditText) dialogView.findViewById(R.id.et_max_elements);
         etMaxElements.setHint(res.getString(R.string.set_max_elements));
+        etMaxElements.setText(String.valueOf(DEFAULT_MAX_ELEMENTS_IN_MEMORY));
+        etMaxElements.setSelection(etMaxElements.length());
 
         dialogBuilder.setTitle(res.getString(R.string.change_max_elements));
         dialogBuilder.setMessage(res.getString(R.string.enter_max_elements));
         dialogBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                loadNextDataFromDb(0);
+
+                if (Integer.parseInt(etMaxElements.getText().toString()) < DEFAULT_MAX_ELEMENTS_IN_MEMORY) {
+                    DEFAULT_MAX_ELEMENTS_IN_MEMORY = Integer.parseInt(etMaxElements.getText().toString());
+                    from = 0;
+                    usersList.clear();
+                    usersAdapter.notifyDataSetChanged();
+                    scrollListener.resetState();
+                    loadNextDataFromDb(from);
+                }
             }
+
         });
         dialogBuilder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {

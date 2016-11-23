@@ -5,10 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import ua.it.pavlo.tykhonov.westsoftukrainetestapp.content.User;
 import ua.it.pavlo.tykhonov.westsoftukrainetestapp.database.tables.UsersTable;
 
 /**

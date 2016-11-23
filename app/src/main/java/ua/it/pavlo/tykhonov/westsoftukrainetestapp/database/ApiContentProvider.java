@@ -10,12 +10,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import ua.it.pavlo.tykhonov.westsoftukrainetestapp.content.User;
 import ua.it.pavlo.tykhonov.westsoftukrainetestapp.database.tables.UsersTable;
 
 public class ApiContentProvider extends ContentProvider {
