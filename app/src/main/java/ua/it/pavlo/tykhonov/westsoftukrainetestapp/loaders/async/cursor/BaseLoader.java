@@ -58,6 +58,4 @@ public class BaseLoader extends Loader<Cursor> {
         }
         mCursor = null;
     }
-
-
 }

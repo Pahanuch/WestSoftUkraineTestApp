@@ -200,5 +200,4 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 }
             }, 2000);
     }
-
 }
