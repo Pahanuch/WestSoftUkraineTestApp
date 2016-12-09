@@ -1,3 +1,2 @@
-# WestSoftUkraineTestApp
-Тестовое задание. Компания WestSoftUkraine
-https://github.com/Pahanuch/WestSoftUkraineTestApp/blob/master/Screen_monitors.png
+![# WestSoftUkraineTestApp
+Тестовое задание. Компания WestSoftUkrainet](https://github.com/Pahanuch/WestSoftUkraineTestApp/blob/master/Screen_monitors.png?raw=true "Screen Monitors")
