@@ -4,7 +4,9 @@ import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
@@ -12,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +42,7 @@ import ua.it.pavlo.tykhonov.westsoftukrainetestapp.utils.EndlessRecyclerViewScro
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private static int DEFAULT_MAX_ELEMENTS_IN_MEMORY = 50;
+    private static int DEFAULT_MAX_ELEMENTS_IN_RECYCLER_VIEW = 20;
     private int from = 0;
 
     private boolean doubleBackToExitPressedOnce = false;
@@ -74,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,17 +101,26 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(null);
+        recyclerView.setItemViewCacheSize(DEFAULT_MAX_ELEMENTS_IN_MEMORY);
         recyclerView.setAdapter(usersAdapter);
 
         scrollListener = new EndlessRecyclerViewScrollListener(mLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-
+                Log.d("totalItemsCount", String.valueOf(totalItemsCount));
+                if (totalItemsCount + DEFAULT_MAX_ELEMENTS_IN_RECYCLER_VIEW >=
+                        DEFAULT_MAX_ELEMENTS_IN_MEMORY) {
+                    usersList.clear();
+                    usersAdapter.notifyDataSetChanged();
+                    scrollListener.resetState();
+                }
                 loadNextDataFromDb(page);
             }
         };
         // Adds the scroll listener to RecyclerView
         recyclerView.addOnScrollListener(scrollListener);
+
+        mLayoutManager.requestLayout();
 
         getSupportLoaderManager().initLoader(R.id.users_loader, Bundle.EMPTY, this);
 
@@ -116,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case R.id.users_loader:
-                return new UsersLoader(this, from, DEFAULT_MAX_ELEMENTS_IN_MEMORY);
+                return new UsersLoader(this, from, DEFAULT_MAX_ELEMENTS_IN_RECYCLER_VIEW);
 
             default:
                 return null;
@@ -131,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         usersAdapter.notifyDataSetChanged();
 
         getLoaderManager().destroyLoader(id);
-
     }
 
     @Override
@@ -140,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void loadNextDataFromDb(int offset) {
-        this.from = offset * DEFAULT_MAX_ELEMENTS_IN_MEMORY;
+        from = offset * DEFAULT_MAX_ELEMENTS_IN_RECYCLER_VIEW;
         getSupportLoaderManager().restartLoader(R.id.users_loader, Bundle.EMPTY, this);
     }
 
@@ -153,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         final EditText etMaxElements = (EditText) dialogView.findViewById(R.id.et_max_elements);
         etMaxElements.setHint(res.getString(R.string.set_max_elements));
-        etMaxElements.setText(String.valueOf(DEFAULT_MAX_ELEMENTS_IN_MEMORY));
+        etMaxElements.setText(String.valueOf(DEFAULT_MAX_ELEMENTS_IN_RECYCLER_VIEW));
         etMaxElements.setSelection(etMaxElements.length());
 
         dialogBuilder.setTitle(res.getString(R.string.change_max_elements));
@@ -161,8 +174,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         dialogBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
 
-                if (Integer.parseInt(etMaxElements.getText().toString()) < DEFAULT_MAX_ELEMENTS_IN_MEMORY) {
-                    DEFAULT_MAX_ELEMENTS_IN_MEMORY = Integer.parseInt(etMaxElements.getText().toString());
+                if (Integer.parseInt(etMaxElements.getText().toString()) < DEFAULT_MAX_ELEMENTS_IN_RECYCLER_VIEW) {
+                    DEFAULT_MAX_ELEMENTS_IN_RECYCLER_VIEW = Integer.parseInt(etMaxElements.getText().toString());
                     from = 0;
                     usersList.clear();
                     usersAdapter.notifyDataSetChanged();

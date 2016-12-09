@@ -4,13 +4,13 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 
 /**
  * Created by Tikho on 11.11.2016.
  */
 
 public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
-
     // The minimum amount of items to have below your current scroll position
     // before loading more.
     private int visibleThreshold = 5;
@@ -67,11 +67,12 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
     // This happens many times a second during a scroll, so be wary of the code you place here.
     // We are given a few useful parameters to help us work out if we need to load some more data,
     // but first we check if we are waiting for the previous load to finish.
-
     @Override
     public void onScrolled(RecyclerView view, int dx, int dy) {
+        //super.onScrolled(view, dx, dy);
 
         int lastVisibleItemPosition = 0;
+        int firstVisibleItemPosition = 0;
         int totalItemCount = mLayoutManager.getItemCount();
 
         if (mLayoutManager instanceof StaggeredGridLayoutManager) {
@@ -88,6 +89,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         } else if (mLayoutManager instanceof LinearLayoutManager) {
 
             lastVisibleItemPosition = ((LinearLayoutManager) mLayoutManager).findLastVisibleItemPosition();
+            firstVisibleItemPosition = ((LinearLayoutManager) mLayoutManager).findFirstVisibleItemPosition();
 
         }
 
@@ -95,7 +97,6 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         // list is invalidated and should be reset back to initial state
 
         if (totalItemCount < previousTotalItemCount) {
-
             this.currentPage = this.startingPageIndex;
             this.previousTotalItemCount = totalItemCount;
 
@@ -118,18 +119,36 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         // If we do need to reload some more data, we execute onLoadMore to fetch the data.
         // threshold should reflect how many total columns there are too
 
-        if (!loading && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
-
-            currentPage++;
-            onLoadMore(currentPage, totalItemCount, view);
-            loading = true;
+        if (!view.canScrollVertically(-1)) {
+            onScrolledToTop();
+        } else if (!view.canScrollVertically(1)) {
+            onScrolledToBottom();
+        }
+        if (dy < 0) {
+                if ((!loading && (firstVisibleItemPosition - visibleThreshold) == 0)) {
+                    if (currentPage > 0) {
+                        currentPage--;
+                        onLoadMore(currentPage, totalItemCount, view);
+                        loading = true;
+                    }
+            }
+        } else if (dy > 0) {
+            if (!loading && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
+                currentPage++;
+                onLoadMore(currentPage, totalItemCount, view);
+                loading = true;
+            }
         }
     }
 
+
+    public void onScrolledToTop() {}
+
+    public void onScrolledToBottom() {}
     // Call this method whenever performing new searches
     public void resetState() {
 
-        this.currentPage = this.startingPageIndex;
+        //this.currentPage = this.startingPageIndex;
         this.previousTotalItemCount = 0;
         this.loading = true;
     }
