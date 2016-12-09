@@ -1,2 +1,3 @@
-![# WestSoftUkraineTestApp
-Тестовое задание. Компания WestSoftUkrainet](https://github.com/Pahanuch/WestSoftUkraineTestApp/blob/master/Screen_monitors.png?raw=true "Screen Monitors")
+# WestSoftUkraineTestApp
+Тестовое задание. Компания WestSoftUkrainet
+![Alt text](/blob/master/Screen_monitors.png?raw=true "Optional Title")
